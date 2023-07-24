@@ -9,9 +9,6 @@ class Task {
     }
 }
 
-let task1 = new Task("HW");
-console.log(task1);
-
 class TaskManager {
     public tasks: Task[];
     constructor() {
@@ -19,35 +16,33 @@ class TaskManager {
     }
     addTask(description: string): void {
         this.tasks.push(new Task(description));
+        localStorage.setItem("myTasks", JSON.stringify(this.tasks))
     }
     deleteTask(id: number): void {
         let indexToDelete = this.tasks.findIndex((task: Task) => task.id == id)
         this.tasks.splice(indexToDelete, 1)
+        localStorage.setItem("myTasks", JSON.stringify(this.tasks))
     }
     updateTaskDescription(id: number, newDescription: string): void {
         let indexToUpdate = this.tasks.findIndex((task: Task) => task.id == id)
         this.tasks[indexToUpdate].description = newDescription;
+        localStorage.setItem("myTasks", JSON.stringify(this.tasks))
     }
     completeTask(id: number): void {
         let indexToUpdate = this.tasks.findIndex((task: Task) => task.id == id)
         this.tasks[indexToUpdate].completed = true;
+        localStorage.setItem("myTasks", JSON.stringify(this.tasks))
     }
 }
 
+
 let manager = new TaskManager();
-manager.addTask("Dishes");
-manager.addTask("Home Work");
-console.log(manager.tasks);
+manager.addTask("My first task");
 
-// function showTasksInTable(): void {
-//     for (let task of manager.tasks) {
-//         document.getElementById(
-//             "tasks"
-//         )!.innerHTML += `<tr> <td> ${task.id} </td> <td> ${task.description} </td> <td> ${task.completed} </td> </tr>`;
-//     }
-// }
-
-// showTasksInTable();
+if (localStorage.getItem("myTasks") != null) {
+    manager.tasks = JSON.parse(localStorage.getItem("myTasks") as string)
+    showTasksInLists()
+}
 
 function showTasksInLists() {
     document.getElementById("active")!.innerHTML = "";
@@ -55,10 +50,48 @@ function showTasksInLists() {
     for (let task of manager.tasks) {
         if (task.completed == false) {
             document.getElementById("active")!.innerHTML += `
-     <div> <li class="list-group-item d-inline-block w-50">${task.description}</li> <span> <button class="btn btn-success" onclick="completeTask(${task.id})"><i class="fa-solid fa-check"></i></button> <button class="btn btn-primary" onclick="updateDescription(${task.id})"><i class="fa-solid fa-pen"></i></button> <button class="btn btn-danger" onclick="deleteTask(${task.id})"><i class="fa-solid fa-trash"></i></button></span> </div> `;
+     <div class="row">
+                <div class="col-9">
+                    <li class="list-group-item d-inline-block w-100" style="border-radius: 7px">
+                    ${task.description}
+                    </li>
+                </div>
+                <div class="col-3">
+                    <span>
+                        <button class="btn btn-success" onclick="completeTask(${task.id})">
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                        <button class="btn btn-primary" onclick="updateDescription(${task.id})">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteTask(${task.id})">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </span>
+                </div>
+            </div> `;
         } else {
             document.getElementById("completed")!.innerHTML += `
-      <div> <li class="list-group-item d-inline-block w-50 text-decoration-line-through">${task.description}</li> <span> <button class="btn btn-success" disabled><i class="fa-solid fa-check-double"></i></button> <button class="btn btn-primary" disabled><i class="fa-solid fa-pen"></i></button> <button class="btn btn-danger" disabled><i class="fa-solid fa-trash"></i></button></span> </div> `;
+      <div class="row">
+                <div class="col-8">
+                    <li class="list-group-item d-inline-block w-100 text-decoration-line-through" style="border-radius: 7px">
+                    ${task.description}
+                    </li>
+                </div>
+                <div class="col-4">
+                    <span>
+                        <button class="btn btn-success" onclick="completeTask(${task.id})">
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                        <button class="btn btn-primary" onclick="updateDescription(${task.id})">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteTask(${task.id})">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </span>
+                </div>
+            </div> `;
         }
     }
 }
@@ -71,7 +104,6 @@ function completeTask(id: number) {
 }
 
 function updateDescription(id: number) {
-    // prompt for new description
     let newDescription = prompt("Enter new description:");
     if (newDescription != null && newDescription != "") {
         manager.updateTaskDescription(id, newDescription!);
@@ -80,7 +112,6 @@ function updateDescription(id: number) {
 }
 
 function deleteTask(id: number) {
-    // confirm "Are you sure?"
     if (confirm("Are you sure?")) {
         manager.deleteTask(id);
         showTasksInLists();
@@ -88,8 +119,7 @@ function deleteTask(id: number) {
 }
 
 function addNewTask() {
-    let description = (document.getElementById("description") as HTMLInputElement)
-        .value;
+    let description = (document.getElementById("description") as HTMLInputElement).value;
     manager.addTask(description);
     (document.getElementById("description") as HTMLInputElement).value = "";
     showTasksInLists();
